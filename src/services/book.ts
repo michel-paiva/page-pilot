@@ -5,7 +5,7 @@ import { PaginatedResponse, PaginationParams } from "../lib/types/pagination";
 const getBooks = async ({ page = 1, limit = 10 }: PaginationParams): Promise<PaginatedResponse<Book>> => {
     const skip = (page - 1) * limit;
     
-    const [books, total] = await prisma.$transaction([
+    const [books, total] = await Promise.all([
         prisma.book.findMany({
             skip,
             take: limit,
@@ -57,7 +57,7 @@ const deleteBook = async (id: string) => {
 
 const getBooksByAuthorId = async (authorId: string, { page = 1, limit = 10 }: PaginationParams) => {
     const skip = (page - 1) * limit;
-    const [books, total] = await prisma.$transaction([
+    const [books, total] = await Promise.all([
         prisma.book.findMany({
             where: { authorId },
             skip,

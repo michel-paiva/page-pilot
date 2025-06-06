@@ -9,7 +9,9 @@ import { z } from "zod";
 const bookRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.get("/", {
         schema: {
-            querystring: paginationSchema,
+            querystring: z.object({
+                ...paginationSchema,
+            }),
             response: {
                 200: listResponse(bookSchema),
             },

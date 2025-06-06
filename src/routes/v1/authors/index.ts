@@ -110,7 +110,9 @@ const authorRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.get("/:id/books", {
         schema: {
             params: idRequestSchema,
-            querystring: paginationSchema,
+            querystring: z.object({
+                ...paginationSchema,
+            }),
             response: {
                 200: listResponse(bookSchema),
             },

@@ -1,38 +1,103 @@
 import { FastifyPluginAsync } from "fastify";
 import { createBook, deleteBook, getBookById, getBooks, updateBook } from "../../../services/book";
 import { Book } from "../../../generated/prisma";
+import { errorResponse, listResponse } from "../../../lib/schemas/response";
+import { bookInputSchema, bookSchema } from "../../../lib/schemas/book";
+import { idRequestSchema, paginationSchema } from "../../../lib/schemas/request";
+import { z } from "zod";
 
 const bookRoutes: FastifyPluginAsync = async (fastify) => {
-    fastify.get("/", async (request, reply) => {
+    fastify.get("/", {
+        schema: {
+            querystring: paginationSchema,
+            response: {
+                200: listResponse(bookSchema),
+            },
+        }
+    }, async (request, reply) => {
         const { page = 1, limit = 10 } = request.query as { page?: number; limit?: number };
         const books = await getBooks({ page: Number(page), limit: Number(limit) });
         return books;
     });
 
-    fastify.get("/:id", async (request, reply) => {
+    fastify.get("/:id", {
+        schema: {
+            params: idRequestSchema,
+            response: {
+                200: bookSchema,
+                404: errorResponse,
+            },
+        }
+    }, async (request, reply) => {
         const { id } = request.params as { id: string };
         const book = await getBookById(id);
+        if (!book) {
+            reply.status(404);
+            return {
+                error: "Book not found",
+                message: "Book not found",
+                statusCode: 404,
+            };
+        }
         return book;
     });
 
-    fastify.post("/", async (request, reply) => {
+    fastify.post("/", {
+        schema: {
+            body: bookInputSchema,
+            response: {
+                201: bookSchema,
+                422: errorResponse,
+            },
+        }
+    }, async (request, reply) => {
         const book = request.body as Book;
         const newBook = await createBook(book);
         reply.status(201);
         return newBook;
     });
 
-    fastify.put("/:id", async (request, reply) => {
+    fastify.put("/:id", {
+        schema: {
+            params: idRequestSchema,
+            body: bookInputSchema,
+            response: {
+                200: bookSchema,
+                422: errorResponse,
+                404: errorResponse,
+            },
+        }
+    }, async (request, reply) => {
         const { id } = request.params as { id: string };
         const book = request.body as Book;
+        const existingBook = await getBookById(id);
+        if (!existingBook) {
+            reply.status(404);
+            return {
+                error: "Book not found",
+                message: "Book not found",
+                statusCode: 404,
+            };
+        }
         const updatedBook = await updateBook(id, book);
         reply.status(200);
         return updatedBook;
     });
 
-    fastify.delete("/:id", async (request, reply) => {
+    fastify.delete("/:id", {
+        schema: {
+            params: idRequestSchema,
+            response: {
+                204: z.null(),
+            },
+        }
+    }, async (request, reply) => {
         const { id } = request.params as { id: string };
-        await deleteBook(id);
+        const book = await getBookById(id);
+        if (book) {
+            await deleteBook(id);
+        }
+
         reply.status(204);
         return reply.send();
     });

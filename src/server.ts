@@ -8,7 +8,7 @@ const start = async () => {
             }
         });
         await server.listen({ port: 3000 });
-        server.log.info(`Server is running on ${server.server.address()}`);
+        server.log.info(`Server is running on ${JSON.stringify(server.server.address())}`);
     } catch (err) {
         console.error(err);
         process.exit(1);

@@ -31,7 +31,7 @@ model Book {
   title           String
   summary         String
   publicationYear Int
-  author          Author   @relation(fields: [authorId], references: [id])
+  author          Author   @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId        String
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

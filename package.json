@@ -1,0 +1,29 @@
+{
+  "name": "page-pilot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "bootstrap:dev": "prisma migrate dev && prisma generate --generator=client",
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "tsc && prisma generate --generator=tsBuild",
+    "start": "node dist/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.11.1",
+  "dependencies": {
+    "@fastify/autoload": "^6.3.1",
+    "@prisma/client": "6.9.0",
+    "fastify": "^5.3.3",
+    "prisma": "^6.9.0",
+    "zod": "^3.25.55"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.30",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.8.3"
+  }
+}

@@ -9,7 +9,7 @@ const start = async () => {
       },
     });
 
-    await startBookSubscriber();
+    await startBookSubscriber(server.log);
 
     await server.listen({ port: 3000, host: '0.0.0.0' });
     server.log.info(`Server is running on ${JSON.stringify(server.server.address())}`);

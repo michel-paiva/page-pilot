@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { FastifyInstance } from 'fastify';
 import prisma from '../lib/prisma';
 import { BookSearchResult, GoogleBook, OpenLibraryBook } from '../lib/types/cover';
 
@@ -61,7 +62,10 @@ export async function searchGoogleBooks(title: string): Promise<BookSearchResult
   }
 }
 
-export async function fetchAndUpdateBookCover(bookData: { id: string; title: string }) {
+export async function fetchAndUpdateBookCover(
+  bookData: { id: string; title: string },
+  logger: FastifyInstance['log']
+) {
   try {
     const [openLibraryResult, googleBooksResult] = await Promise.all([
       searchOpenLibrary(bookData.title),
@@ -76,7 +80,7 @@ export async function fetchAndUpdateBookCover(bookData: { id: string; title: str
         where: { id: bookData.id },
         data: { coverUrl: result.coverUrl },
       });
-      console.log(`Updated cover for book ${bookData.id} from direct URL`);
+      logger.info(`Updated cover for book ${bookData.id} from direct URL`);
     } else if (result.isbn) {
       const response = await axios.get<
         Record<string, { cover?: { large?: string; medium?: string } }>
@@ -88,14 +92,14 @@ export async function fetchAndUpdateBookCover(bookData: { id: string; title: str
           where: { id: bookData.id },
           data: { coverUrl: bookInfo.cover.large || bookInfo.cover.medium },
         });
-        console.log(`Updated cover for book ${bookData.id} using ISBN`);
+        logger.info(`Updated cover for book ${bookData.id} using ISBN`);
       } else {
-        console.log(`No cover found for book ${bookData.id} with ISBN ${result.isbn}`);
+        logger.info(`No cover found for book ${bookData.id} with ISBN ${result.isbn}`);
       }
     } else {
-      console.log(`No ISBN or cover found for book ${bookData.id}`);
+      logger.info(`No ISBN or cover found for book ${bookData.id}`);
     }
   } catch (error) {
-    console.error(`Error fetching cover for book ${bookData.id}:`, error);
+    logger.error(`Error fetching cover for book ${bookData.id}:`, error);
   }
 }

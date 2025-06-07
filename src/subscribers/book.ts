@@ -1,9 +1,10 @@
+import { FastifyInstance } from 'fastify';
 import Redis from 'ioredis';
 import { fetchAndUpdateBookCover } from '../services/cover';
 
 const COVER_CHANNEL = 'book-cover-fetch';
 
-export async function startBookSubscriber() {
+export async function startBookSubscriber(logger: FastifyInstance['log']) {
   if (process.env.BOOK_SUBSCRIBER_ENABLED !== 'true') {
     console.log('Cover service is disabled');
     return;
@@ -13,19 +14,19 @@ export async function startBookSubscriber() {
 
   void subscriber.subscribe(COVER_CHANNEL, err => {
     if (err) {
-      console.error('Failed to subscribe to Redis channel:', err);
+      logger.error('Failed to subscribe to Redis channel:', err);
       return;
     }
-    console.log('Subscribed to Redis channel:', COVER_CHANNEL);
+    logger.info('Subscribed to Redis channel:', COVER_CHANNEL);
   });
 
   subscriber.on('message', (channel, message) => {
     if (channel === COVER_CHANNEL) {
       try {
         const bookData = JSON.parse(message) as { id: string; title: string };
-        void fetchAndUpdateBookCover(bookData);
+        void fetchAndUpdateBookCover(bookData, logger);
       } catch (error) {
-        console.error('Error processing message:', error);
+        logger.error('Error processing message:', error);
       }
     }
   });

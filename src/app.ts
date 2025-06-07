@@ -1,13 +1,21 @@
 import fastifyAutoload from "@fastify/autoload";
 import fastifyCors from "@fastify/cors";
+import fastifyJwt from "@fastify/jwt";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 import fastify, { FastifyServerOptions } from "fastify";
 import { serializerCompiler, validatorCompiler, ZodTypeProvider, jsonSchemaTransform } from "fastify-type-provider-zod";
 import path from "path";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const build = async (opts: FastifyServerOptions = {}) => {
     const app = fastify(opts).withTypeProvider<ZodTypeProvider>();
+
+    app.register(fastifyJwt, {
+        secret: process.env.JWT_SECRET as string,
+    });
 
     app.register(fastifyCors, {
         origin: "*",

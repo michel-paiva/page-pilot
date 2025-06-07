@@ -28,6 +28,11 @@ const getFavoriteBooksByUserId = async (
       include: {
         book: true,
       },
+      orderBy: {
+        book: {
+          title: 'asc',
+        },
+      },
       skip,
       take: limit,
     }),

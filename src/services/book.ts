@@ -69,6 +69,9 @@ const getBooksByAuthorId = async (authorId: string, { page = 1, limit = 10 }: Pa
       where: { authorId },
       skip,
       take: limit,
+      orderBy: {
+        title: 'asc',
+      },
     }),
     prisma.book.count({
       where: { authorId },

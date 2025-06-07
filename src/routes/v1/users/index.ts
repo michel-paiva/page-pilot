@@ -9,14 +9,14 @@ const userRoutes: FastifyPluginAsync = async (fastify) => {
         schema: {
             body: userInputSchema,
             response: {
-                201: userSchema,
+                201: userSchema.omit({ password: true }),
                 422: errorResponse,
                 400: errorResponse,
             },
             tags: ["users"],
         }
     }, async (request, reply) => {
-        const {password_confirmation, ...body} = request.body as { password_confirmation: string } & User;
+        const {passwordConfirmation, ...body} = request.body as { passwordConfirmation: string } & User;
 
         const user = body as User;
 
@@ -31,6 +31,7 @@ const userRoutes: FastifyPluginAsync = async (fastify) => {
         }
 
         const newUser = await createUser(user);
+        reply.status(201);
         return newUser;
     });
 }

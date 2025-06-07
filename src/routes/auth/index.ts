@@ -16,6 +16,7 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
                 }),
                 401: errorResponse,
             },
+            tags: ["auth"],
         },
     }, async (request, reply) => {
         const { email, password } = request.body as { email: string; password: string };

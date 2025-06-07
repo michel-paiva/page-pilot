@@ -3,7 +3,7 @@ import fastifyCors from "@fastify/cors";
 import fastifyJwt from "@fastify/jwt";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
-import fastify, { FastifyServerOptions } from "fastify";
+import fastify, { FastifyReply, FastifyRequest, FastifyServerOptions } from "fastify";
 import { serializerCompiler, validatorCompiler, ZodTypeProvider, jsonSchemaTransform } from "fastify-type-provider-zod";
 import path from "path";
 import dotenv from "dotenv";
@@ -16,6 +16,14 @@ const build = async (opts: FastifyServerOptions = {}) => {
     app.register(fastifyJwt, {
         secret: process.env.JWT_SECRET as string,
     });
+
+    app.decorate("authenticate", async (request: FastifyRequest, reply: FastifyReply) =>{
+        try {
+            await request.jwtVerify()
+        } catch (err) {
+            reply.send(err)
+        }
+    })
 
     app.register(fastifyCors, {
         origin: "*",
@@ -36,8 +44,20 @@ const build = async (opts: FastifyServerOptions = {}) => {
             ],
             tags: [
                 { name: "authors", description: "Author related endpoints" },
-                { name: "books", description: "Book related endpoints" }
-            ]
+                { name: "books", description: "Book related endpoints" },
+                { name: "favorites", description: "Favorite related endpoints" },
+                { name: "auth", description: "Authentication related endpoints" },
+                { name: "users", description: "User related endpoints" }
+            ],
+            components: {
+                securitySchemes: {
+                    token: {
+                        type: "http",
+                        scheme: "bearer",
+                        bearerFormat: "JWT",
+                    }
+                }
+            }
         },
         transform: jsonSchemaTransform,
     });

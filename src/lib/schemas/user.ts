@@ -14,8 +14,8 @@ export const userInputSchema = userSchema.omit({
     createdAt: true,
     updatedAt: true,
 }).extend({
-    password_confirmation: z.string(),
-}).refine((data) => data.password === data.password_confirmation, {
+    passwordConfirmation: z.string(),
+}).refine((data) => data.password === data.passwordConfirmation, {
     message: "Passwords do not match",
-    path: ["password_confirmation"],
+    path: ["passwordConfirmation"],
 });

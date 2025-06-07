@@ -17,7 +17,8 @@ const authorRoutes: FastifyPluginAsync = async (fastify) => {
             }),
             response: {
                 200: listResponse(authorSchema)
-            }
+            },
+            tags: ["authors"],
         }
     }, async (request, reply) => {
         const { page = 1, limit = 10 } = request.query as PaginationParams;
@@ -32,6 +33,7 @@ const authorRoutes: FastifyPluginAsync = async (fastify) => {
                 200: authorSchema,
                 404: errorResponse,
             },
+            tags: ["authors"],
         }
     }, async (request, reply) => {
         const { id } = request.params as { id: string };
@@ -54,6 +56,7 @@ const authorRoutes: FastifyPluginAsync = async (fastify) => {
                 201: authorSchema,
                 422: errorResponse,
             },
+            tags: ["authors"],
         }
     }, async (request, reply) => {
         const author = request.body as Author;
@@ -71,6 +74,7 @@ const authorRoutes: FastifyPluginAsync = async (fastify) => {
                 422: errorResponse,
                 404: errorResponse,
             },
+            tags: ["authors"],
         }
     }, async (request, reply) => {
         const { id } = request.params as { id: string };
@@ -95,6 +99,7 @@ const authorRoutes: FastifyPluginAsync = async (fastify) => {
             response: {
                 204: z.null(),
             },
+            tags: ["authors"],
         }
     }, async (request, reply) => {
         const { id } = request.params as { id: string };
@@ -116,6 +121,7 @@ const authorRoutes: FastifyPluginAsync = async (fastify) => {
             response: {
                 200: listResponse(bookSchema),
             },
+            tags: ["authors"],
         }
     }, async (request, reply) => {
         const { id } = request.params as { id: string };

@@ -1,10 +1,46 @@
 import fastifyAutoload from "@fastify/autoload";
+import fastifyCors from "@fastify/cors";
+import fastifySwagger from "@fastify/swagger";
+import fastifySwaggerUi from "@fastify/swagger-ui";
 import fastify, { FastifyServerOptions } from "fastify";
-import { serializerCompiler, validatorCompiler, ZodTypeProvider } from "fastify-type-provider-zod";
+import { serializerCompiler, validatorCompiler, ZodTypeProvider, jsonSchemaTransform } from "fastify-type-provider-zod";
 import path from "path";
 
 const build = async (opts: FastifyServerOptions = {}) => {
-    const app = fastify(opts);
+    const app = fastify(opts).withTypeProvider<ZodTypeProvider>();
+
+    app.register(fastifyCors, {
+        origin: "*",
+    });
+
+    app.register(fastifySwagger, {
+        openapi: {
+            info: {
+                title: "Page Pilot API",
+                version: "1.0.0",
+                description: "API documentation for Page Pilot where you can manage your books and authors",
+            },
+            servers: [
+                {
+                    url: "http://localhost:3000",
+                    description: "Main server"
+                }
+            ],
+            tags: [
+                { name: "authors", description: "Author related endpoints" },
+                { name: "books", description: "Book related endpoints" }
+            ]
+        },
+        transform: jsonSchemaTransform,
+    });
+
+    app.register(fastifySwaggerUi, {
+        routePrefix: '/documentation',
+        uiConfig: {
+            docExpansion: 'list',
+            deepLinking: true
+        },
+    });
 
     app.register(fastifyAutoload, {
         dir: path.join(__dirname, "routes"),
@@ -31,7 +67,7 @@ const build = async (opts: FastifyServerOptions = {}) => {
         }
     });
 
-    return app.withTypeProvider<ZodTypeProvider>();
+    return app;
 };
 
 export default build;

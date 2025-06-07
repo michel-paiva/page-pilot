@@ -5,6 +5,7 @@ import { errorResponse, listResponse } from "../../../lib/schemas/response";
 import { bookInputSchema, bookSchema } from "../../../lib/schemas/book";
 import { idRequestSchema, paginationSchema } from "../../../lib/schemas/request";
 import { z } from "zod";
+import { getAuthorById } from "../../../services/author";
 
 const bookRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.get("/", {
@@ -15,6 +16,7 @@ const bookRoutes: FastifyPluginAsync = async (fastify) => {
             response: {
                 200: listResponse(bookSchema),
             },
+            tags: ["books"],
         }
     }, async (request, reply) => {
         const { page = 1, limit = 10 } = request.query as { page?: number; limit?: number };
@@ -29,6 +31,7 @@ const bookRoutes: FastifyPluginAsync = async (fastify) => {
                 200: bookSchema,
                 404: errorResponse,
             },
+            tags: ["books"],
         }
     }, async (request, reply) => {
         const { id } = request.params as { id: string };
@@ -51,9 +54,21 @@ const bookRoutes: FastifyPluginAsync = async (fastify) => {
                 201: bookSchema,
                 422: errorResponse,
             },
+            tags: ["books"],
         }
     }, async (request, reply) => {
         const book = request.body as Book;
+
+        const author = await getAuthorById(book.authorId);
+        if (!author) {
+            reply.status(404);
+            return {
+                error: "Author not found",
+                message: "Author not found",
+                statusCode: 404,
+            };
+        }
+
         const newBook = await createBook(book);
         reply.status(201);
         return newBook;
@@ -68,6 +83,7 @@ const bookRoutes: FastifyPluginAsync = async (fastify) => {
                 422: errorResponse,
                 404: errorResponse,
             },
+            tags: ["books"],
         }
     }, async (request, reply) => {
         const { id } = request.params as { id: string };
@@ -81,6 +97,18 @@ const bookRoutes: FastifyPluginAsync = async (fastify) => {
                 statusCode: 404,
             };
         }
+
+        const author = await getAuthorById(book.authorId);
+
+        if (!author) {
+            reply.status(404);
+            return {
+                error: "Author not found",
+                message: "Author not found",
+                statusCode: 404,
+            };
+        }
+
         const updatedBook = await updateBook(id, book);
         reply.status(200);
         return updatedBook;
@@ -92,6 +120,7 @@ const bookRoutes: FastifyPluginAsync = async (fastify) => {
             response: {
                 204: z.null(),
             },
+            tags: ["books"],
         }
     }, async (request, reply) => {
         const { id } = request.params as { id: string };

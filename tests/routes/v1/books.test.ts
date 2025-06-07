@@ -6,7 +6,6 @@ describe('Book Routes', () => {
     it('should create a book', async () => {
         const app = await build();
 
-        // First create an author
         const authorResponse = await app.inject({
             method: 'POST',
             url: '/v1/authors',
@@ -65,7 +64,6 @@ describe('Book Routes', () => {
     it('should return book by id', async () => {
         const app = await build();
 
-        // First create an author
         const authorResponse = await app.inject({
             method: 'POST',
             url: '/v1/authors',
@@ -131,7 +129,6 @@ describe('Book Routes', () => {
         setupDb('file:./test-list-books.testdb');
         const app = await build();
 
-        // First create an author
         const authorResponse = await app.inject({
             method: 'POST',
             url: '/v1/authors',
@@ -185,7 +182,6 @@ describe('Book Routes', () => {
     it('should delete book', async () => {
         const app = await build();
 
-        // First create an author
         const authorResponse = await app.inject({
             method: 'POST',
             url: '/v1/authors',
@@ -233,7 +229,6 @@ describe('Book Routes', () => {
     it('should update book', async () => {
         const app = await build();
 
-        // First create an author
         const authorResponse = await app.inject({
             method: 'POST',
             url: '/v1/authors',
@@ -289,7 +284,6 @@ describe('Book Routes', () => {
     it('should return validation error if the update request is invalid', async () => {
         const app = await build();
 
-        // First create an author
         const authorResponse = await app.inject({
             method: 'POST',
             url: '/v1/authors',
@@ -328,6 +322,73 @@ describe('Book Routes', () => {
         expect(responseUpdate.statusCode).toBe(422);
         expect(responseUpdate.json().error).toEqual("Validation error");
         expect(responseUpdate.json().statusCode).toEqual(422);
+
+        await app.close();
+    });
+
+    it('should return error when creating a book with non-existent author', async () => {
+        const app = await build();
+
+        const response = await app.inject({
+            method: 'POST',
+            url: '/v1/books',
+            payload: {
+                title: 'The Great Book',
+                summary: 'An amazing story',
+                publicationYear: 2023,
+                authorId: randomUUID(),
+            }
+        });
+
+        expect(response.statusCode).toBe(404);
+        expect(response.json().error).toEqual("Author not found");
+        expect(response.json().statusCode).toEqual(404);
+
+        await app.close();
+    });
+
+    it('should return error when updating a book with non-existent author', async () => {
+        const app = await build();
+
+        const authorResponse = await app.inject({
+            method: 'POST',
+            url: '/v1/authors',
+            payload: {
+                name: 'John Doe',
+                bio: 'A famous author',
+                birthYear: 1990
+            }
+        });
+
+        const authorId = authorResponse.json().id;
+
+        const responsePost = await app.inject({
+            method: 'POST',
+            url: '/v1/books',
+            payload: {
+                title: 'The Great Book',
+                summary: 'An amazing story',
+                publicationYear: 2023,
+                authorId: authorId
+            }
+        });
+
+        const bookId = responsePost.json().id;
+
+        const response = await app.inject({
+            method: 'PUT',
+            url: `/v1/books/${bookId}`,
+            payload: {
+                title: 'The not so Great Book',
+                summary: 'An not so amazing story',
+                publicationYear: 2022,
+                authorId: randomUUID()
+            }
+        });
+
+        expect(response.statusCode).toBe(404);
+        expect(response.json().error).toEqual("Author not found");
+        expect(response.json().statusCode).toEqual(404);
 
         await app.close();
     });

@@ -1,14 +1,14 @@
-import { User } from "../generated/prisma";
-import prisma from "../lib/prisma";
-import crypto from "crypto";
-import util from "util";
+import crypto from 'crypto';
+import util from 'util';
+import { User } from '../generated/prisma';
+import prisma from '../lib/prisma';
 
 const scrypt = util.promisify(crypto.scrypt);
 
 const createUser = async (user: User) => {
-  const salt = crypto.randomBytes(16).toString("hex");
+  const salt = crypto.randomBytes(16).toString('hex');
   const derivedKey = (await scrypt(user.password, salt, 64)) as Buffer;
-  const passwordHash = derivedKey.toString("base64");
+  const passwordHash = derivedKey.toString('base64');
 
   user.password = `${salt}:${passwordHash}`;
 
@@ -22,38 +22,38 @@ const createUser = async (user: User) => {
 };
 
 const getUserByEmailWithoutPassword = async (email: string) => {
-    const user = await prisma.user.findUnique({
-        where: { email }
-    });
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
 
-    if (!user) {
-        return null;
-    }
+  if (!user) {
+    return null;
+  }
 
-    const { password, ...userWithoutPassword } = user;
+  const { password, ...userWithoutPassword } = user;
 
-    return userWithoutPassword;
-}
+  return userWithoutPassword;
+};
 
 const getUserByEmail = async (email: string) => {
-    const user = await prisma.user.findUnique({
-        where: { email }
-    });
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
 
-    return user;
-}
+  return user;
+};
 
 const verifyUser = async (email: string, passwordToVerify: string) => {
-    const user = await getUserByEmail(email);
-    if (!user) {
-        return null;
-    }
-    const [salt, passwordHash] = user.password.split(":");
-    const derivedKey = (await scrypt(passwordToVerify, salt, 64)) as Buffer;
+  const user = await getUserByEmail(email);
+  if (!user) {
+    return null;
+  }
+  const [salt, passwordHash] = user.password.split(':');
+  const derivedKey = (await scrypt(passwordToVerify, salt, 64)) as Buffer;
 
-    const { password, ...userWithoutPassword } = user;
+  const { password, ...userWithoutPassword } = user;
 
-    return derivedKey.toString("base64") === passwordHash ? userWithoutPassword : null;
-}
+  return derivedKey.toString('base64') === passwordHash ? userWithoutPassword : null;
+};
 
-export { createUser, getUserByEmail, verifyUser, getUserByEmailWithoutPassword };
+export { createUser, getUserByEmail, getUserByEmailWithoutPassword, verifyUser };

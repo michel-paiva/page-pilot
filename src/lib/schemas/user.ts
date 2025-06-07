@@ -1,21 +1,24 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const userSchema = z.object({
-    id: z.string().uuid(),
-    email: z.string().email(),
-    password: z.string(),
-    name: z.string().optional(),
-    createdAt: z.date(),
-    updatedAt: z.date(),
+  id: z.string().uuid(),
+  email: z.string().email(),
+  password: z.string(),
+  name: z.string().optional(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
 });
 
-export const userInputSchema = userSchema.omit({
+export const userInputSchema = userSchema
+  .omit({
     id: true,
     createdAt: true,
     updatedAt: true,
-}).extend({
+  })
+  .extend({
     passwordConfirmation: z.string(),
-}).refine((data) => data.password === data.passwordConfirmation, {
-    message: "Passwords do not match",
-    path: ["passwordConfirmation"],
-});
+  })
+  .refine(data => data.password === data.passwordConfirmation, {
+    message: 'Passwords do not match',
+    path: ['passwordConfirmation'],
+  });

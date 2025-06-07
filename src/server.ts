@@ -2,7 +2,7 @@ import build from './app';
 
 const start = async () => {
   try {
-    const server = await build({
+    const server = build({
       logger: {
         level: 'info',
       },
@@ -15,4 +15,4 @@ const start = async () => {
   }
 };
 
-start();
+void start();

@@ -21,7 +21,7 @@ const bookRoutes: FastifyPluginAsync = async fastify => {
         tags: ['books'],
       },
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       const { page = 1, limit = 10 } = request.query as { page?: number; limit?: number };
       const books = await getBooks({ page: Number(page), limit: Number(limit) });
       return books;

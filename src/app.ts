@@ -15,7 +15,7 @@ import path from 'path';
 
 dotenv.config();
 
-const build = async (opts: FastifyServerOptions = {}) => {
+const build = (opts: FastifyServerOptions = {}) => {
   const app = fastify(opts).withTypeProvider<ZodTypeProvider>();
 
   app.register(fastifyJwt, {

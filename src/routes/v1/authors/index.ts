@@ -29,7 +29,7 @@ const authorRoutes: FastifyPluginAsync = async fastify => {
         tags: ['authors'],
       },
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       const { page = 1, limit = 10 } = request.query as PaginationParams;
       const authors = await getAuthors({ page: Number(page), limit: Number(limit) });
       return authors;
@@ -152,7 +152,7 @@ const authorRoutes: FastifyPluginAsync = async fastify => {
         tags: ['authors'],
       },
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       const { id } = request.params as { id: string };
       const { page = 1, limit = 10 } = request.query as { page?: number; limit?: number };
       const books = await getBooksByAuthorId(id, { page: Number(page), limit: Number(limit) });

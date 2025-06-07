@@ -4,7 +4,7 @@
     "es2021": true,
     "jest": true
   },
-  "ignorePatterns": ["src/generated/**"],
+  "ignorePatterns": ["src/generated/**", "tests/**/*"],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",

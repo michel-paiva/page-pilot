@@ -4,7 +4,7 @@ import { setupDb } from '../../setup';
 
 describe('Author Routes', () => {
     it('should create an author', async () => {
-        const app = await build();
+        const app = build();
 
         const response = await app.inject({
             method: 'POST',
@@ -30,7 +30,7 @@ describe('Author Routes', () => {
     });
 
     it('should return validation error if the create request is invalid', async () => {
-        const app = await build();
+        const app = build();
 
         const response = await app.inject({
             method: 'POST',
@@ -48,7 +48,7 @@ describe('Author Routes', () => {
     });
 
     it('should return author by id', async () => {
-        const app = await build();
+        const app = build();
 
         const responsePost = await app.inject({
             method: 'POST',
@@ -83,7 +83,7 @@ describe('Author Routes', () => {
     });
 
     it('should return 404 if the author does not exist', async () => {
-        const app = await build();
+        const app = build();
 
         const response = await app.inject({
             method: 'GET',
@@ -99,7 +99,7 @@ describe('Author Routes', () => {
 
     it('should return all authors and paginate them', async () => {
         setupDb('file:./test-list-authors.testdb');
-        const app = await build();
+        const app = build();
 
         for (let i = 0; i < 10; i++) {
             await app.inject({
@@ -139,7 +139,7 @@ describe('Author Routes', () => {
     });
 
     it('should return delete author', async () => {
-        const app = await build();
+        const app = build();
 
         const responsePost = await app.inject({
             method: 'POST',
@@ -173,7 +173,7 @@ describe('Author Routes', () => {
     });
 
     it('should return update author', async () => {
-        const app = await build();
+        const app = build();
 
         const responsePost = await app.inject({
             method: 'POST',
@@ -213,7 +213,7 @@ describe('Author Routes', () => {
     });
 
     it('should return validation error if the update request is invalid', async () => {
-        const app = await build();
+        const app = build();
 
         const responsePost = await app.inject({
             method: 'POST',
@@ -245,7 +245,7 @@ describe('Author Routes', () => {
     });
 
     it('should list books by author', async () => {
-        const app = await build();
+        const app = build();
 
         const responsePost = await app.inject({
             method: 'POST',

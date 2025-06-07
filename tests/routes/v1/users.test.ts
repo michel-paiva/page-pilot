@@ -3,7 +3,7 @@ import { setupDb } from '../../setup';
 
 describe('User Routes', () => {
     it('should create a new user successfully', async () => {
-        const app = await build();
+        const app = build();
 
         const response = await app.inject({
             method: 'POST',
@@ -29,7 +29,7 @@ describe('User Routes', () => {
     });
 
     it('should return validation error if password confirmation does not match', async () => {
-        const app = await build();
+        const app = build();
 
         const response = await app.inject({
             method: 'POST',
@@ -49,7 +49,7 @@ describe('User Routes', () => {
     });
 
     it('should return validation error if email is invalid', async () => {
-        const app = await build();
+        const app = build();
 
         const response = await app.inject({
             method: 'POST',
@@ -70,9 +70,8 @@ describe('User Routes', () => {
 
     it('should return error if user already exists', async () => {
         setupDb('file:./test-user-exists.testdb');
-        const app = await build();
+        const app = build();
 
-        // Create first user
         const firstResponse = await app.inject({
             method: 'POST',
             url: '/v1/users',
@@ -86,7 +85,6 @@ describe('User Routes', () => {
 
         expect(firstResponse.statusCode).toBe(201);
 
-        // Try to create user with same email
         const secondResponse = await app.inject({
             method: 'POST',
             url: '/v1/users',
@@ -109,14 +107,13 @@ describe('User Routes', () => {
     });
 
     it('should return validation error if required fields are missing', async () => {
-        const app = await build();
+        const app = build();
 
         const response = await app.inject({
             method: 'POST',
             url: '/v1/users',
             payload: {
                 email: 'test@example.com'
-                // Missing password, passwordConfirmation, and name
             }
         });
 

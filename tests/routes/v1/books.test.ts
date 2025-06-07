@@ -4,7 +4,7 @@ import { setupDb } from '../../setup';
 
 describe('Book Routes', () => {
     it('should create a book', async () => {
-        const app = await build();
+        const app = build();
 
         const authorResponse = await app.inject({
             method: 'POST',
@@ -34,6 +34,7 @@ describe('Book Routes', () => {
             id: expect.any(String),
             title: 'The Great Book',
             summary: 'An amazing story',
+            coverUrl: null,
             publicationYear: 2023,
             authorId: authorId,
             createdAt: expect.any(String),
@@ -44,7 +45,7 @@ describe('Book Routes', () => {
     });
 
     it('should return validation error if the create request is invalid', async () => {
-        const app = await build();
+        const app = build();
 
         const response = await app.inject({
             method: 'POST',
@@ -62,7 +63,7 @@ describe('Book Routes', () => {
     });
 
     it('should return book by id', async () => {
-        const app = await build();
+        const app = build();
 
         const authorResponse = await app.inject({
             method: 'POST',
@@ -102,6 +103,7 @@ describe('Book Routes', () => {
             title: 'The Great Book',
             summary: 'An amazing story',
             publicationYear: 2023,
+            coverUrl: null,
             authorId: authorId,
             createdAt: expect.any(String),
             updatedAt: expect.any(String)
@@ -111,7 +113,7 @@ describe('Book Routes', () => {
     });
 
     it('should return 404 if the book does not exist', async () => {
-        const app = await build();
+        const app = build();
 
         const response = await app.inject({
             method: 'GET',
@@ -127,7 +129,7 @@ describe('Book Routes', () => {
 
     it('should return all books and paginate them', async () => {
         setupDb('file:./test-list-books.testdb');
-        const app = await build();
+        const app = build();
 
         const authorResponse = await app.inject({
             method: 'POST',
@@ -180,7 +182,7 @@ describe('Book Routes', () => {
     });
 
     it('should delete book', async () => {
-        const app = await build();
+        const app = build();
 
         const authorResponse = await app.inject({
             method: 'POST',
@@ -227,7 +229,7 @@ describe('Book Routes', () => {
     });
 
     it('should update book', async () => {
-        const app = await build();
+        const app = build();
 
         const authorResponse = await app.inject({
             method: 'POST',
@@ -273,6 +275,7 @@ describe('Book Routes', () => {
             title: 'The Updated Book',
             summary: 'An even better story',
             publicationYear: 2024,
+            coverUrl: null,
             authorId: authorId,
             createdAt: expect.any(String),
             updatedAt: expect.any(String)
@@ -282,7 +285,7 @@ describe('Book Routes', () => {
     });
 
     it('should return validation error if the update request is invalid', async () => {
-        const app = await build();
+        const app = build();
 
         const authorResponse = await app.inject({
             method: 'POST',
@@ -327,7 +330,7 @@ describe('Book Routes', () => {
     });
 
     it('should return error when creating a book with non-existent author', async () => {
-        const app = await build();
+        const app = build();
 
         const response = await app.inject({
             method: 'POST',
@@ -348,7 +351,7 @@ describe('Book Routes', () => {
     });
 
     it('should return error when updating a book with non-existent author', async () => {
-        const app = await build();
+        const app = build();
 
         const authorResponse = await app.inject({
             method: 'POST',

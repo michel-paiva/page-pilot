@@ -63,7 +63,7 @@ const createBook = async (app: FastifyInstance) => {
 
 describe('Favorites Routes', () => {
     it('should fail to create if book does not exist', async () => {
-        const app = await build();
+        const app = build();
 
         const token = await getToken(app, 'failcreatefavorite');
 
@@ -82,7 +82,7 @@ describe('Favorites Routes', () => {
     });
 
     it('should create a favorite', async () => {
-        const app = await build();
+        const app = build();
 
         const token = await getToken(app, 'createfavorite');
 
@@ -103,7 +103,7 @@ describe('Favorites Routes', () => {
     });
 
     it('should fail to create if book is already favorited', async () => {
-        const app = await build();
+        const app = build();
 
         const token = await getToken(app, 'doublecreatefavorite');
 
@@ -137,7 +137,7 @@ describe('Favorites Routes', () => {
     });
 
     it('should scope favorites to the user', async () => {
-        const app = await build();
+        const app = build();
 
         const token = await getToken(app, 'scopefavorites1');
 
@@ -185,7 +185,7 @@ describe('Favorites Routes', () => {
     });
 
     it('should delete a favorite', async () => {
-        const app = await build();
+        const app = build();
 
         const token = await getToken(app, 'deletefavorite');
 

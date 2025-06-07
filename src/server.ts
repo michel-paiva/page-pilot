@@ -1,4 +1,5 @@
 import build from './app';
+import { startBookSubscriber } from './subscribers/book';
 
 const start = async () => {
   try {
@@ -7,6 +8,9 @@ const start = async () => {
         level: 'info',
       },
     });
+
+    await startBookSubscriber();
+
     await server.listen({ port: 3000, host: '0.0.0.0' });
     server.log.info(`Server is running on ${JSON.stringify(server.server.address())}`);
   } catch (err) {

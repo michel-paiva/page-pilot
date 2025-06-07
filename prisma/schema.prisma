@@ -31,6 +31,7 @@ model Book {
   title           String
   summary         String
   publicationYear Int
+  coverUrl        String?
   author          Author   @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId        String
   favorites       Favorite[]

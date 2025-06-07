@@ -2,7 +2,7 @@ import build from '../../src/app';
 
 describe('Health Route', () => {
     it('should return 200 on /health', async () => {
-        const app = await build();
+        const app = build();
 
         const response = await app.inject({
             method: 'GET',

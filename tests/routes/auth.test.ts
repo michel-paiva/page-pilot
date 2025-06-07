@@ -3,9 +3,8 @@ import { setupDb } from '../setup';
 
 describe('Auth Routes', () => {
     it('should login successfully with valid credentials', async () => {
-        const app = await build();
+        const app = build();
 
-        // First create a user
         const userResponse = await app.inject({
             method: 'POST',
             url: '/v1/users',
@@ -19,7 +18,6 @@ describe('Auth Routes', () => {
 
         expect(userResponse.statusCode).toBe(201);
 
-        // Now try to login
         const response = await app.inject({
             method: 'POST',
             url: '/auth/login',
@@ -38,7 +36,7 @@ describe('Auth Routes', () => {
     });
 
     it('should return 401 with invalid credentials', async () => {
-        const app = await build();
+        const app = build();
 
         const response = await app.inject({
             method: 'POST',
@@ -60,7 +58,7 @@ describe('Auth Routes', () => {
     });
 
     it('should return validation error with invalid email format', async () => {
-        const app = await build();
+        const app = build();
 
         const response = await app.inject({
             method: 'POST',

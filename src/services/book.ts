@@ -1,6 +1,7 @@
 import { Book } from '../generated/prisma';
 import prisma from '../lib/prisma';
 import { PaginatedResponse, PaginationParams } from '../lib/types/pagination';
+import { publishBookCoverRequest } from '../subscribers/book';
 
 const getBooks = async ({
   page = 1,
@@ -40,6 +41,9 @@ const createBook = async (book: Book) => {
   const newBook = await prisma.book.create({
     data: book,
   });
+
+  await publishBookCoverRequest(newBook.id, newBook.title);
+
   return newBook;
 };
 

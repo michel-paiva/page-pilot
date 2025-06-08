@@ -8,6 +8,7 @@ A modern web application for managing books and authors, built with Fastify, Pri
 
 - 📚 Book management (CRUD operations)
 - 👥 Author management (CRUD operations)
+- ❤️ User favorites management (Authentication required)
 - 🔍 Book cover fetching from Open Library and Google Books (async)
 - 🔐 JWT-based authentication
 - 🧪 Comprehensive test suite

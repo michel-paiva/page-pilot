@@ -1,16 +1,9 @@
-import crypto from 'crypto';
-import util from 'util';
 import { User } from '../generated/prisma';
 import prisma from '../lib/prisma';
-
-const scrypt = util.promisify(crypto.scrypt);
+import { hashPassword, verifyPassword } from './password';
 
 const createUser = async (user: User) => {
-  const salt = crypto.randomBytes(16).toString('hex');
-  const derivedKey = (await scrypt(user.password, salt, 64)) as Buffer;
-  const passwordHash = derivedKey.toString('base64');
-
-  user.password = `${salt}:${passwordHash}`;
+  user.password = await hashPassword(user.password);
 
   const newUser = await prisma.user.create({
     data: user,
@@ -48,12 +41,14 @@ const verifyUser = async (email: string, passwordToVerify: string) => {
   if (!user) {
     return null;
   }
-  const [salt, passwordHash] = user.password.split(':');
-  const derivedKey = (await scrypt(passwordToVerify, salt, 64)) as Buffer;
+
+  const isValid = await verifyPassword(passwordToVerify, user.password);
+  if (!isValid) {
+    return null;
+  }
 
   const { password, ...userWithoutPassword } = user;
-
-  return derivedKey.toString('base64') === passwordHash ? userWithoutPassword : null;
+  return userWithoutPassword;
 };
 
 export { createUser, getUserByEmail, getUserByEmailWithoutPassword, verifyUser };

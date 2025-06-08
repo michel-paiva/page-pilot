@@ -7,15 +7,15 @@ A modern web application for managing books and authors, built with Fastify, Pri
 ## Features
 
 - 📚 Book management (CRUD operations)
-- 👥 Author management
-- 🔍 Book cover fetching from Open Library and Google Books
+- 👥 Author management (CRUD operations)
+- 🔍 Book cover fetching from Open Library and Google Books (async)
 - 🔐 JWT-based authentication
 - 🧪 Comprehensive test suite
 - 📝 API documentation with Swagger
 
 ## Tech Stack
 
-- **Backend**: Fastify, TypeScript, Prisma
+- **Backend**: Fastify, TypeScript, Prisma, Zod
 - **Database**: SQLite
 - **Message Queue**: Redis (as a plus if running on docker covers are added asynchronously if found on google books or open library)
 - **Testing**: Jest
@@ -31,40 +31,49 @@ A modern web application for managing books and authors, built with Fastify, Pri
 ## Setup
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/michel-paiva/page-pilot.git
    cd page-pilot
    ```
 
 2. Install dependencies:
+
    ```bash
    pnpm install
    ```
 
 3. Set up environment variables:
+
    ```bash
    cp .env.example .env
    ```
-   Edit `.env` with your configuration.
 
-4. Choose your setup method:
+   Edit `.env` with your configuration. (if needed)
+
+4. Bootstrap the development environment
+
+   ```bash
+   pnpm bootstrap:dev
+   ```
+
+5. Choose your setup method:
 
    ### Local Development
+
    ```bash
-   # Bootstrap the development environment
-   pnpm bootstrap:dev
-   
    # Start the development server
    pnpm dev
    ```
 
    ### Docker Development
+
    ```bash
    # Start the containers
    docker-compose up -d
    
-   # Bootstrap the development environment inside the container
-   docker-compose exec app pnpm bootstrap:dev
+   # Bootstrap the development environment inside the container since the host machine OS might differ from docker
+   docker-compose exec app pnpm bootstrap:dev && docker-compose restart app
    ```
 
 ## Running Ports
@@ -79,13 +88,15 @@ The API uses JWT (JSON Web Tokens) for authentication. To access protected endpo
 1. Register a new user at `POST /v1/users`
 2. Login at `POST /v1/auth/login`
 3. Use the returned token in the `Authorization` header:
-   ```
+
+   ```text
    Authorization: Bearer <your-token>
    ```
 
 ## Available Resources
 
 ### Books
+
 - `GET /v1/books` - List all books
 - `GET /v1/books/:id` - Get book details
 - `POST /v1/books` - Create a new book
@@ -93,6 +104,7 @@ The API uses JWT (JSON Web Tokens) for authentication. To access protected endpo
 - `DELETE /v1/books/:id` - Delete a book
 
 ### Authors
+
 - `GET /v1/authors` - List all authors
 - `GET /v1/authors/:id` - Get author details
 - `POST /v1/authors` - Create a new author
@@ -100,14 +112,15 @@ The API uses JWT (JSON Web Tokens) for authentication. To access protected endpo
 - `DELETE /v1/authors/:id` - Delete an author
 
 ### Users
+
 - `POST /v1/users` - Register a new user
 - `POST /v1/auth/login` - Login
-- `GET /v1/users/me` - Get current user profile
 
 ### Favorites
+
 - `GET /v1/favorites` - List user's favorite books
 - `POST /v1/favorites` - Add a book to favorites
-- `DELETE /v1/favorites` - Remove a book from favorites
+- `DELETE /v1/favorites/:id` - Remove a book from favorites
 
 ## Building
 
@@ -124,5 +137,6 @@ pnpm test
 ## API Documentation
 
 Once the server is running, visit:
+
 - Swagger UI: `http://localhost:3000/documentation`
 - OpenAPI JSON: `http://localhost:3000/documentation/json`

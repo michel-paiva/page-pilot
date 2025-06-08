@@ -1,14 +1,14 @@
 import { Author } from '../generated/prisma';
 import prisma from '../lib/prisma';
-import { PaginatedResponse, PaginationParams } from '../lib/types/pagination';
+import { PaginationParams } from '../lib/types/pagination';
+import { calculateSkip, formatResponse } from '../lib/utils/pagination';
 
 const getAuthors = async ({
   page = 1,
   limit = 10,
   search,
-}: PaginationParams & { search?: string }): Promise<PaginatedResponse<Author>> => {
-  const skip = (page - 1) * limit;
-
+}: PaginationParams & { search?: string }) => {
+  const skip = calculateSkip(page, limit);
   const where = search
     ? {
         OR: [{ name: { contains: search } }, { bio: { contains: search } }],
@@ -27,14 +27,7 @@ const getAuthors = async ({
     prisma.author.count({ where }),
   ]);
 
-  return {
-    data: authors,
-    meta: {
-      total,
-      page,
-      totalPages: Math.ceil(total / limit),
-    },
-  };
+  return formatResponse(authors, total, page, limit);
 };
 
 const getAuthorById = async (id: string) => {

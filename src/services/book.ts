@@ -1,20 +1,24 @@
 import { Book } from '../generated/prisma';
 import prisma from '../lib/prisma';
-import { PaginatedResponse, PaginationParams } from '../lib/types/pagination';
+import { PaginationParams } from '../lib/types/pagination';
+import { calculateSkip, formatResponse } from '../lib/utils/pagination';
 import { publishBookCoverRequest } from '../subscribers/book';
+
+const createBookSearchWhere = (search?: string) => {
+  return search
+    ? {
+        OR: [{ title: { contains: search } }, { summary: { contains: search } }],
+      }
+    : {};
+};
 
 const getBooks = async ({
   page = 1,
   limit = 10,
   search,
-}: PaginationParams & { search?: string }): Promise<PaginatedResponse<Book>> => {
-  const skip = (page - 1) * limit;
-
-  const where = search
-    ? {
-        OR: [{ title: { contains: search } }, { summary: { contains: search } }],
-      }
-    : {};
+}: PaginationParams & { search?: string }) => {
+  const skip = calculateSkip(page, limit);
+  const where = createBookSearchWhere(search);
 
   const [books, total] = await Promise.all([
     prisma.book.findMany({
@@ -28,14 +32,7 @@ const getBooks = async ({
     prisma.book.count({ where }),
   ]);
 
-  return {
-    data: books,
-    meta: {
-      total,
-      page,
-      totalPages: Math.ceil(total / limit),
-    },
-  };
+  return formatResponse(books, total, page, limit);
 };
 
 const getBookById = async (id: string) => {
@@ -70,11 +67,19 @@ const deleteBook = async (id: string) => {
   return deletedBook;
 };
 
-const getBooksByAuthorId = async (authorId: string, { page = 1, limit = 10 }: PaginationParams) => {
-  const skip = (page - 1) * limit;
+const getBooksByAuthorId = async (
+  authorId: string,
+  { page = 1, limit = 10, search }: PaginationParams & { search?: string }
+) => {
+  const skip = calculateSkip(page, limit);
+  const where = {
+    authorId,
+    ...createBookSearchWhere(search),
+  };
+
   const [books, total] = await Promise.all([
     prisma.book.findMany({
-      where: { authorId },
+      where,
       skip,
       take: limit,
       orderBy: {
@@ -82,18 +87,11 @@ const getBooksByAuthorId = async (authorId: string, { page = 1, limit = 10 }: Pa
       },
     }),
     prisma.book.count({
-      where: { authorId },
+      where,
     }),
   ]);
 
-  return {
-    data: books,
-    meta: {
-      total,
-      page,
-      totalPages: Math.ceil(total / limit),
-    },
-  };
+  return formatResponse(books, total, page, limit);
 };
 
 export { createBook, deleteBook, getBookById, getBooks, getBooksByAuthorId, updateBook };

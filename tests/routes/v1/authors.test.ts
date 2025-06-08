@@ -41,8 +41,6 @@ describe('Author Routes', () => {
         expect(response.statusCode).toBe(422);
         expect(response.json().error).toEqual("Validation error");
         expect(response.json().statusCode).toEqual(422);
-
-        
     });
 
     it('should return author by id', async () => {
@@ -269,8 +267,6 @@ describe('Author Routes', () => {
         expect(responseGetBooks.json().data.length).toBe(1);
         expect(responseGetBooks.json().data[0].title).toBe('Book 1');
         expect(responseGetBooks.json().data[0].authorId).toBe(authorId);
-
-        
     });
 
     it('should search authors by name and bio', async () => {
@@ -335,5 +331,130 @@ describe('Author Routes', () => {
         expect(responseByCommon.json().data.map((author: any) => author.name)).toEqual(
             expect.arrayContaining(['George R.R. Martin', 'Stephen King'])
         );
+    });
+
+    it('should list books by author with search', async () => {
+        const app = build();
+
+        const authorResponse = await app.inject({
+            method: 'POST',
+            url: '/v1/authors',
+            payload: {
+                name: 'John Doe',
+                bio: 'A famous author',
+                birthYear: 1990
+            }
+        });
+
+        expect(authorResponse.statusCode).toBe(201);
+        const authorId = authorResponse.json().id;
+
+        const books = [
+            {
+                title: 'The Great Adventure',
+                summary: 'An exciting journey',
+                publicationYear: 2023,
+                authorId
+            },
+            {
+                title: 'Mystery House',
+                summary: 'A thrilling mystery',
+                publicationYear: 2023,
+                authorId
+            },
+            {
+                title: 'Adventure Time',
+                summary: 'A fun story',
+                publicationYear: 2023,
+                authorId
+            }
+        ];
+
+        for (const book of books) {
+            await app.inject({
+                method: 'POST',
+                url: '/v1/books',
+                payload: book
+            });
+        }
+
+        const titleSearchResponse = await app.inject({
+            method: 'GET',
+            url: `/v1/authors/${authorId}/books?search=Adventure`
+        });
+
+        expect(titleSearchResponse.statusCode).toBe(200);
+        expect(titleSearchResponse.json().data.length).toBe(2);
+        expect(titleSearchResponse.json().data.map((book: any) => book.title)).toEqual(
+            expect.arrayContaining(['The Great Adventure', 'Adventure Time'])
+        );
+
+        const summarySearchResponse = await app.inject({
+            method: 'GET',
+            url: `/v1/authors/${authorId}/books?search=thrilling`
+        });
+
+        expect(summarySearchResponse.statusCode).toBe(200);
+        expect(summarySearchResponse.json().data.length).toBe(1);
+        expect(summarySearchResponse.json().data[0].title).toBe('Mystery House');
+
+        const noResultsResponse = await app.inject({
+            method: 'GET',
+            url: `/v1/authors/${authorId}/books?search=nonexistent`
+        });
+
+        expect(noResultsResponse.statusCode).toBe(200);
+        expect(noResultsResponse.json().data.length).toBe(0);
+        expect(noResultsResponse.json().meta.total).toBe(0);
+    });
+
+    it('should list books by author with search and pagination', async () => {
+        const app = build();
+
+        const authorResponse = await app.inject({
+            method: 'POST',
+            url: '/v1/authors',
+            payload: {
+                name: 'John Doe',
+                bio: 'A famous author',
+                birthYear: 1990
+            }
+        });
+
+        expect(authorResponse.statusCode).toBe(201);
+        const authorId = authorResponse.json().id;
+
+        for (let i = 0; i < 5; i++) {
+            await app.inject({
+                method: 'POST',
+                url: '/v1/books',
+                payload: {
+                    title: `Adventure Book ${i}`,
+                    summary: `Summary ${i}`,
+                    publicationYear: 2023,
+                    authorId
+                }
+            });
+        }
+
+        const response = await app.inject({
+            method: 'GET',
+            url: `/v1/authors/${authorId}/books?search=Adventure&page=1&limit=2`
+        });
+
+        expect(response.statusCode).toBe(200);
+        expect(response.json().data.length).toBe(2);
+        expect(response.json().meta.total).toBe(5);
+        expect(response.json().meta.page).toBe(1);
+        expect(response.json().meta.totalPages).toBe(3);
+
+        const response2 = await app.inject({
+            method: 'GET',
+            url: `/v1/authors/${authorId}/books?search=Adventure&page=2&limit=2`
+        });
+
+        expect(response2.statusCode).toBe(200);
+        expect(response2.json().data.length).toBe(2);
+        expect(response2.json().meta.page).toBe(2);
     });
 }); 

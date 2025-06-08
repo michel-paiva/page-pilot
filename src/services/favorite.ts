@@ -1,5 +1,6 @@
 import prisma from '../lib/prisma';
 import { PaginationParams } from '../lib/types/pagination';
+import { calculateSkip, formatResponse } from '../lib/utils/pagination';
 
 const createFavorite = async (userId: string, bookId: string) => {
   const favorite = await prisma.favorite.create({
@@ -18,8 +19,7 @@ const getFavoriteBooksByUserId = async (
   userId: string,
   { page = 1, limit = 10, search }: PaginationParams & { search?: string }
 ) => {
-  const skip = (page - 1) * limit;
-
+  const skip = calculateSkip(page, limit);
   const where = {
     userId,
     ...(search
@@ -50,14 +50,7 @@ const getFavoriteBooksByUserId = async (
     }),
   ]);
 
-  return {
-    data: favorites,
-    meta: {
-      total,
-      page,
-      totalPages: Math.ceil(total / limit),
-    },
-  };
+  return formatResponse(favorites, total, page, limit);
 };
 
 const getFavoriteByIdAndUserId = async (id: string, userId: string) => {

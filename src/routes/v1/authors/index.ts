@@ -149,6 +149,7 @@ const authorRoutes: FastifyPluginAsync = async fastify => {
         params: idRequestSchema,
         querystring: z.object({
           ...paginationSchema,
+          search: z.string().optional(),
         }),
         response: {
           200: listResponse(bookSchema),
@@ -158,8 +159,16 @@ const authorRoutes: FastifyPluginAsync = async fastify => {
     },
     async (request, _reply) => {
       const { id } = request.params as { id: string };
-      const { page = 1, limit = 10 } = request.query as { page?: number; limit?: number };
-      const books = await getBooksByAuthorId(id, { page: Number(page), limit: Number(limit) });
+      const {
+        page = 1,
+        limit = 10,
+        search,
+      } = request.query as { page?: number; limit?: number; search?: string };
+      const books = await getBooksByAuthorId(id, {
+        page: Number(page),
+        limit: Number(limit),
+        search,
+      });
       return books;
     }
   );

@@ -13,7 +13,5 @@ describe('Health Route', () => {
         const payload = JSON.parse(response.payload);
         expect(payload.status).toBe('ok');
         expect(payload).toHaveProperty('timestamp');
-        
-        await app.close();
     });
 }); 

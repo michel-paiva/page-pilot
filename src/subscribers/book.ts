@@ -6,7 +6,7 @@ const COVER_CHANNEL = 'book-cover-fetch';
 
 export async function startBookSubscriber(logger: FastifyInstance['log']) {
   if (process.env.BOOK_SUBSCRIBER_ENABLED !== 'true') {
-    console.log('Cover service is disabled');
+    logger.info('Cover service is disabled');
     return;
   }
 

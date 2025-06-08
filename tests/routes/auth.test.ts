@@ -31,8 +31,6 @@ describe('Auth Routes', () => {
         expect(response.json()).toEqual({
             token: expect.any(String)
         });
-
-        await app.close();
     });
 
     it('should return 401 with invalid credentials', async () => {
@@ -53,8 +51,6 @@ describe('Auth Routes', () => {
             message: 'Invalid credentials',
             statusCode: 401
         });
-
-        await app.close();
     });
 
     it('should return validation error with invalid email format', async () => {
@@ -71,7 +67,5 @@ describe('Auth Routes', () => {
 
         expect(response.statusCode).toBe(422);
         expect(response.json().error).toBeDefined();
-
-        await app.close();
     });
 }); 

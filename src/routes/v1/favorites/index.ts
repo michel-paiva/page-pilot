@@ -35,8 +35,8 @@ const favoriteRoutes: FastifyPluginAsync = async fastify => {
     },
     async (request, _reply) => {
       const userId = (request.user as { userId: string }).userId;
-      const { page, limit } = request.query as PaginationParams;
-      const favorites = await getFavoriteBooksByUserId(userId, { page, limit });
+      const { page, limit, search } = request.query as PaginationParams & { search?: string };
+      const favorites = await getFavoriteBooksByUserId(userId, { page, limit, search });
       return favorites;
     }
   );

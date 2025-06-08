@@ -24,8 +24,6 @@ describe('User Routes', () => {
             createdAt: expect.any(String),
             updatedAt: expect.any(String)
         });
-
-        await app.close();
     });
 
     it('should return validation error if password confirmation does not match', async () => {
@@ -44,8 +42,6 @@ describe('User Routes', () => {
 
         expect(response.statusCode).toBe(422);
         expect(response.json().error).toBeDefined();
-
-        await app.close();
     });
 
     it('should return validation error if email is invalid', async () => {
@@ -64,8 +60,6 @@ describe('User Routes', () => {
 
         expect(response.statusCode).toBe(422);
         expect(response.json().error).toBeDefined();
-
-        await app.close();
     });
 
     it('should return error if user already exists', async () => {
@@ -102,8 +96,6 @@ describe('User Routes', () => {
             message: 'User already exists',
             statusCode: 400
         });
-
-        await app.close();
     });
 
     it('should return validation error if required fields are missing', async () => {
@@ -119,7 +111,5 @@ describe('User Routes', () => {
 
         expect(response.statusCode).toBe(422);
         expect(response.json().error).toBeDefined();
-
-        await app.close();
     });
 }); 

@@ -30,8 +30,12 @@ const authorRoutes: FastifyPluginAsync = async fastify => {
       },
     },
     async (request, _reply) => {
-      const { page = 1, limit = 10 } = request.query as PaginationParams;
-      const authors = await getAuthors({ page: Number(page), limit: Number(limit) });
+      const {
+        page = 1,
+        limit = 10,
+        search,
+      } = request.query as PaginationParams & { search?: string };
+      const authors = await getAuthors({ page: Number(page), limit: Number(limit), search });
       return authors;
     }
   );

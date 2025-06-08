@@ -238,4 +238,126 @@ describe('Favorites Routes', () => {
         const listResponse2Body = listResponse2.json();
         expect(listResponse2Body.meta.total).toBe(0);
     });
+
+    it('should search favorites by book title and summary', async () => {
+        const app = build();
+        const token = await getToken(app, 'searchfavorites');
+
+        const authorResponse = await app.inject({
+            method: 'POST',
+            url: '/v1/authors',
+            payload: {
+                name: 'Test Author',
+                bio: 'Test Bio',
+                birthYear: 1990
+            }
+        });
+
+        expect(authorResponse.statusCode).toBe(201);
+        const authorId = authorResponse.json().id;
+
+        const book1Response = await app.inject({
+            method: 'POST',
+            url: '/v1/books',
+            payload: {
+                title: 'Fantasy Book',
+                summary: 'A magical adventure',
+                publicationYear: 2024,
+                authorId: authorId
+            }
+        });
+
+        const book2Response = await app.inject({
+            method: 'POST',
+            url: '/v1/books',
+            payload: {
+                title: 'Horror Book',
+                summary: 'A scary story',
+                publicationYear: 2024,
+                authorId: authorId
+            }
+        });
+
+        const book3Response = await app.inject({
+            method: 'POST',
+            url: '/v1/books',
+            payload: {
+                title: 'Adventure Book',
+                summary: 'An exciting journey',
+                publicationYear: 2024,
+                authorId: authorId
+            }
+        });
+
+        await app.inject({
+            method: 'POST',
+            url: '/v1/favorites',
+            payload: {
+                bookId: book1Response.json().id
+            },
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        await app.inject({
+            method: 'POST',
+            url: '/v1/favorites',
+            payload: {
+                bookId: book2Response.json().id
+            },
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        await app.inject({
+            method: 'POST',
+            url: '/v1/favorites',
+            payload: {
+                bookId: book3Response.json().id
+            },
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        const responseByTitle = await app.inject({
+            method: 'GET',
+            url: '/v1/favorites?search=Fantasy',
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        expect(responseByTitle.statusCode).toBe(200);
+        expect(responseByTitle.json().data.length).toBe(1);
+        expect(responseByTitle.json().data[0].book.title).toBe('Fantasy Book');
+
+        const responseBySummary = await app.inject({
+            method: 'GET',
+            url: '/v1/favorites?search=scary',
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        expect(responseBySummary.statusCode).toBe(200);
+        expect(responseBySummary.json().data.length).toBe(1);
+        expect(responseBySummary.json().data[0].book.title).toBe('Horror Book');
+
+        const responseByCommon = await app.inject({
+            method: 'GET',
+            url: '/v1/favorites?search=adventure',
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        expect(responseByCommon.statusCode).toBe(200);
+        expect(responseByCommon.json().data.length).toBe(2);
+        expect(responseByCommon.json().data.map((favorite: any) => favorite.book.title)).toEqual(
+            expect.arrayContaining(['Fantasy Book', 'Adventure Book'])
+        );
+    });
 });

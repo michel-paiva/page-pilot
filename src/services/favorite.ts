@@ -16,15 +16,24 @@ const createFavorite = async (userId: string, bookId: string) => {
 
 const getFavoriteBooksByUserId = async (
   userId: string,
-  { page = 1, limit = 10 }: PaginationParams
+  { page = 1, limit = 10, search }: PaginationParams & { search?: string }
 ) => {
   const skip = (page - 1) * limit;
 
+  const where = {
+    userId,
+    ...(search
+      ? {
+          book: {
+            OR: [{ title: { contains: search } }, { summary: { contains: search } }],
+          },
+        }
+      : {}),
+  };
+
   const [favorites, total] = await Promise.all([
     prisma.favorite.findMany({
-      where: {
-        userId,
-      },
+      where,
       include: {
         book: true,
       },
@@ -37,9 +46,7 @@ const getFavoriteBooksByUserId = async (
       take: limit,
     }),
     prisma.favorite.count({
-      where: {
-        userId,
-      },
+      where,
     }),
   ]);
 

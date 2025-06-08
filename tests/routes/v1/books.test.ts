@@ -40,8 +40,6 @@ describe('Book Routes', () => {
             createdAt: expect.any(String),
             updatedAt: expect.any(String)
         });
-
-        await app.close();
     });
 
     it('should return validation error if the create request is invalid', async () => {
@@ -58,8 +56,6 @@ describe('Book Routes', () => {
         expect(response.statusCode).toBe(422);
         expect(response.json().error).toEqual("Validation error");
         expect(response.json().statusCode).toEqual(422);
-
-        await app.close();
     });
 
     it('should return book by id', async () => {
@@ -108,8 +104,6 @@ describe('Book Routes', () => {
             createdAt: expect.any(String),
             updatedAt: expect.any(String)
         });
-
-        await app.close();
     });
 
     it('should return 404 if the book does not exist', async () => {
@@ -123,8 +117,6 @@ describe('Book Routes', () => {
         expect(response.statusCode).toBe(404);
         expect(response.json().error).toEqual("Book not found");
         expect(response.json().statusCode).toEqual(404);
-
-        await app.close();
     });
 
     it('should return all books and paginate them', async () => {
@@ -177,8 +169,6 @@ describe('Book Routes', () => {
         expect(response2.json().meta.total).toBe(10);
         expect(response2.json().meta.page).toBe(4);
         expect(response2.json().meta.totalPages).toBe(4);
-
-        await app.close();
     });
 
     it('should delete book', async () => {
@@ -224,8 +214,6 @@ describe('Book Routes', () => {
         });
 
         expect(responseGet.statusCode).toBe(404);
-
-        await app.close();
     });
 
     it('should update book', async () => {
@@ -280,8 +268,6 @@ describe('Book Routes', () => {
             createdAt: expect.any(String),
             updatedAt: expect.any(String)
         });
-        
-        await app.close();
     });
 
     it('should return validation error if the update request is invalid', async () => {
@@ -325,8 +311,6 @@ describe('Book Routes', () => {
         expect(responseUpdate.statusCode).toBe(422);
         expect(responseUpdate.json().error).toEqual("Validation error");
         expect(responseUpdate.json().statusCode).toEqual(422);
-
-        await app.close();
     });
 
     it('should return error when creating a book with non-existent author', async () => {
@@ -346,8 +330,6 @@ describe('Book Routes', () => {
         expect(response.statusCode).toBe(404);
         expect(response.json().error).toEqual("Author not found");
         expect(response.json().statusCode).toEqual(404);
-
-        await app.close();
     });
 
     it('should return error when updating a book with non-existent author', async () => {
@@ -393,6 +375,85 @@ describe('Book Routes', () => {
         expect(response.json().error).toEqual("Author not found");
         expect(response.json().statusCode).toEqual(404);
 
-        await app.close();
+        
+    });
+
+    it('should search books by title and summary', async () => {
+        setupDb('file:./test-search-books.testdb');
+        const app = build();
+
+        const authorResponse = await app.inject({
+            method: 'POST',
+            url: '/v1/authors',
+            payload: {
+                name: 'John Doe',
+                bio: 'A famous author',
+                birthYear: 1990
+            }
+        });
+
+        const authorId = authorResponse.json().id;
+
+        await app.inject({
+            method: 'POST',
+            url: '/v1/books',
+            payload: {
+                title: 'Harry Potter',
+                summary: 'A magical story',
+                publicationYear: 2020,
+                authorId: authorId
+            }
+        });
+
+        await app.inject({
+            method: 'POST',
+            url: '/v1/books',
+            payload: {
+                title: 'Lord of the Rings',
+                summary: 'A fantasy epic',
+                publicationYear: 2021,
+                authorId: authorId
+            }
+        });
+
+        await app.inject({
+            method: 'POST',
+            url: '/v1/books',
+            payload: {
+                title: 'The Hobbit',
+                summary: 'A magical journey',
+                publicationYear: 2022,
+                authorId: authorId
+            }
+        });
+
+        const responseByTitle = await app.inject({
+            method: 'GET',
+            url: '/v1/books?search=Harry'
+        });
+
+        expect(responseByTitle.statusCode).toBe(200);
+        expect(responseByTitle.json().data.length).toBe(1);
+        expect(responseByTitle.json().data[0].title).toBe('Harry Potter');
+
+        const responseBySummary = await app.inject({
+            method: 'GET',
+            url: '/v1/books?search=epic'
+        });
+
+        expect(responseBySummary.statusCode).toBe(200);
+        expect(responseBySummary.json().data.length).toBe(1);
+        expect(responseBySummary.json().data[0].title).toBe('Lord of the Rings');
+
+        const responseByCommon = await app.inject({
+            method: 'GET',
+            url: '/v1/books?search=magical'
+        });
+
+        expect(responseByCommon.statusCode).toBe(200);
+        expect(responseByCommon.json().data.length).toBe(2);
+        expect(responseByCommon.json().data.map((book: any) => book.title)).toEqual(
+            expect.arrayContaining(['Harry Potter', 'The Hobbit'])
+        );
     });
 }); 

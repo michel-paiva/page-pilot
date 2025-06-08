@@ -5,18 +5,26 @@ import { PaginatedResponse, PaginationParams } from '../lib/types/pagination';
 const getAuthors = async ({
   page = 1,
   limit = 10,
-}: PaginationParams): Promise<PaginatedResponse<Author>> => {
+  search,
+}: PaginationParams & { search?: string }): Promise<PaginatedResponse<Author>> => {
   const skip = (page - 1) * limit;
+
+  const where = search
+    ? {
+        OR: [{ name: { contains: search } }, { bio: { contains: search } }],
+      }
+    : {};
 
   const [authors, total] = await Promise.all([
     prisma.author.findMany({
+      where,
       skip,
       take: limit,
       orderBy: {
         name: 'asc',
       },
     }),
-    prisma.author.count(),
+    prisma.author.count({ where }),
   ]);
 
   return {

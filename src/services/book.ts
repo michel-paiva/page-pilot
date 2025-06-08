@@ -6,18 +6,26 @@ import { publishBookCoverRequest } from '../subscribers/book';
 const getBooks = async ({
   page = 1,
   limit = 10,
-}: PaginationParams): Promise<PaginatedResponse<Book>> => {
+  search,
+}: PaginationParams & { search?: string }): Promise<PaginatedResponse<Book>> => {
   const skip = (page - 1) * limit;
+
+  const where = search
+    ? {
+        OR: [{ title: { contains: search } }, { summary: { contains: search } }],
+      }
+    : {};
 
   const [books, total] = await Promise.all([
     prisma.book.findMany({
+      where,
       skip,
       take: limit,
       orderBy: {
         title: 'asc',
       },
     }),
-    prisma.book.count(),
+    prisma.book.count({ where }),
   ]);
 
   return {

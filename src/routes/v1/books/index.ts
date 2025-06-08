@@ -4,6 +4,7 @@ import { Book } from '../../../generated/prisma';
 import { bookInputSchema, bookSchema } from '../../../lib/schemas/book';
 import { idRequestSchema, paginationSchema } from '../../../lib/schemas/request';
 import { errorResponse, listResponse } from '../../../lib/schemas/response';
+import { PaginationParams } from '../../../lib/types/pagination';
 import { getAuthorById } from '../../../services/author';
 import { createBook, deleteBook, getBookById, getBooks, updateBook } from '../../../services/book';
 
@@ -22,8 +23,12 @@ const bookRoutes: FastifyPluginAsync = async fastify => {
       },
     },
     async (request, _reply) => {
-      const { page = 1, limit = 10 } = request.query as { page?: number; limit?: number };
-      const books = await getBooks({ page: Number(page), limit: Number(limit) });
+      const {
+        page = 1,
+        limit = 10,
+        search,
+      } = request.query as PaginationParams & { search?: string };
+      const books = await getBooks({ page: Number(page), limit: Number(limit), search });
       return books;
     }
   );
